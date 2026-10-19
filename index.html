@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="it" data-tema="carta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vocabolario</title>
+<meta name="description" content="Una parola italiana difficile alla volta, con definizione, esempio e giochi di ripasso.">
+<meta name="theme-color" content="#f4efe6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vocabolario">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="barra-alta">
+  <button class="pillola" id="btn-categorie" type="button" aria-label="Scegli livello e categorie">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <span id="etichetta-filtro">Tutte</span>
+  </button>
+  <div class="destra">
+    <span class="pillola serie" id="serie" title="Giorni di fila">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      <span id="serie-n">0</span>
+    </span>
+    <button class="tondo" id="btn-profilo" type="button" aria-label="Profilo, parole salvate e impostazioni">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="flusso" id="flusso" aria-label="Parole: scorri in verticale"></main>
+
+<footer class="barra-bassa">
+  <button class="pillola grande" id="btn-ripassa" type="button">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+    Ripassa
+  </button>
+  <span class="obiettivo" id="obiettivo" aria-live="polite"></span>
+  <button class="tondo grande" id="btn-temi" type="button" aria-label="Cambia tema">
+    <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r="1.2"/><circle cx="17.5" cy="10.5" r="1.2"/><circle cx="8.5" cy="7.5" r="1.2"/><circle cx="6.5" cy="12.5" r="1.2"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6h1.9A5.6 5.6 0 0 0 22 11c0-5-4.5-9-10-9z"/></svg>
+  </button>
+</footer>
+
+<div class="avviso" id="avviso" role="status" aria-live="polite" hidden></div>
+
+<dialog class="foglio" id="foglio-categorie" aria-labelledby="cat-titolo"></dialog>
+<dialog class="foglio" id="foglio-temi" aria-labelledby="temi-titolo"></dialog>
+<dialog class="foglio" id="foglio-profilo" aria-labelledby="prof-titolo"></dialog>
+<dialog class="foglio alto" id="foglio-ripassa" aria-labelledby="rip-titolo"></dialog>
+<dialog class="foglio" id="foglio-parola" aria-label="Parola"></dialog>
+
+<noscript><p style="padding:24px">Questa app ha bisogno di JavaScript per funzionare.</p></noscript>
+<script src="parole.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

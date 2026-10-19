@@ -1,0 +1,145 @@
+/* Temi: ogni tema ridefinisce gli stessi colori. "carta" segue il chiaro/scuro del telefono. */
+:root,[data-tema="carta"]{
+  --sfondo:#f4efe6;--piano:#fffdf8;--incasso:#ebe4d6;--testo:#1f1b16;--tenue:#6b6257;--linea:#ddd3c2;
+  --accento:#7a4b2a;--su-accento:#fffdf8;--giusto:#2e7d4f;--sbagliato:#b3402b;--ombra:0 8px 28px rgba(31,27,22,.12);
+}
+@media (prefers-color-scheme:dark){
+  [data-tema="carta"]{--sfondo:#17150f;--piano:#221f18;--incasso:#2d2920;--testo:#f2ece1;--tenue:#aaa093;--linea:#3a352b;
+    --accento:#e0a878;--su-accento:#17150f;--giusto:#6fcf97;--sbagliato:#f08a72;--ombra:0 8px 28px rgba(0,0,0,.4)}
+}
+[data-tema="notte"]{--sfondo:#11151f;--piano:#1a2030;--incasso:#232a3c;--testo:#eef1f7;--tenue:#a3abbd;--linea:#2e3649;
+  --accento:#f2c66d;--su-accento:#11151f;--giusto:#6fcf97;--sbagliato:#f08a72;--ombra:0 8px 28px rgba(0,0,0,.45)}
+[data-tema="salvia"]{--sfondo:#dfe7dc;--piano:#f4f7f2;--incasso:#cfd9cb;--testo:#1c2a1f;--tenue:#4e5f51;--linea:#bccbb7;
+  --accento:#2f5d3e;--su-accento:#f4f7f2;--giusto:#2e7d4f;--sbagliato:#a8402c;--ombra:0 8px 28px rgba(28,42,31,.14)}
+[data-tema="cielo"]{--sfondo:#dde8f3;--piano:#f5f9fd;--incasso:#cbdaea;--testo:#14243a;--tenue:#4b5d75;--linea:#b8cbe0;
+  --accento:#25508a;--su-accento:#f5f9fd;--giusto:#2e7d4f;--sbagliato:#b3402b;--ombra:0 8px 28px rgba(20,36,58,.14)}
+[data-tema="terracotta"]{--sfondo:#b9573b;--piano:#c9694c;--incasso:#a74c32;--testo:#fff6ee;--tenue:#f6d9c8;--linea:#d88468;
+  --accento:#fff6ee;--su-accento:#8f3d26;--giusto:#d9f7c8;--sbagliato:#ffe0a3;--ombra:0 8px 28px rgba(60,20,10,.3)}
+[data-tema="lavanda"]{--sfondo:#e6e0f2;--piano:#f8f6fc;--incasso:#d6cdea;--testo:#241c38;--tenue:#5d5375;--linea:#c7bce0;
+  --accento:#5b3f99;--su-accento:#f8f6fc;--giusto:#2e7d4f;--sbagliato:#b3402b;--ombra:0 8px 28px rgba(36,28,56,.14)}
+[data-tema="inchiostro"]{--sfondo:#000;--piano:#141414;--incasso:#202020;--testo:#fff;--tenue:#a8a8a8;--linea:#2c2c2c;
+  --accento:#fff;--su-accento:#000;--giusto:#6fcf97;--sbagliato:#f08a72;--ombra:0 8px 28px rgba(0,0,0,.6)}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--sfondo);color:var(--testo)}
+body{font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;overflow:hidden;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+.serif{font-family:ui-serif,"New York",Georgia,"Times New Roman",serif}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accento);outline-offset:2px}
+
+/* Barre sopra e sotto, sovrapposte al flusso */
+.barra-alta,.barra-bassa{position:fixed;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none}
+.barra-alta{top:0;padding-top:calc(env(safe-area-inset-top,0px) + 10px)}
+.barra-bassa{bottom:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px)}
+.barra-alta > *,.barra-bassa > *{pointer-events:auto}
+.destra{display:flex;gap:8px;align-items:center}
+.pillola{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 14px;border-radius:999px;border:0;
+  background:var(--piano);box-shadow:var(--ombra);font-weight:600;font-size:.92rem;max-width:58vw}
+.pillola span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pillola.grande{min-height:50px;padding:0 20px;font-size:1rem}
+.serie{color:var(--accento)}
+.serie.spenta{color:var(--tenue)}
+.tondo{width:40px;height:40px;border-radius:50%;border:0;background:var(--piano);box-shadow:var(--ombra);display:grid;place-items:center}
+.tondo.grande{width:50px;height:50px}
+.obiettivo{font-size:.82rem;color:var(--tenue);background:var(--piano);padding:6px 11px;border-radius:999px;box-shadow:var(--ombra);font-variant-numeric:tabular-nums}
+.obiettivo.fatto{color:var(--giusto);font-weight:650}
+
+/* Il flusso: una parola a schermo, si scorre in verticale */
+.flusso{height:100%;height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.flusso::-webkit-scrollbar{display:none}
+.carta{height:100%;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;justify-content:center;
+  padding:calc(env(safe-area-inset-top,0px) + 70px) max(28px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 90px) max(28px,env(safe-area-inset-left,0px));
+  max-width:640px;margin:0 auto;position:relative}
+.etichetta{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accento);font-weight:700;margin-bottom:14px}
+.parola{font-family:ui-serif,"New York",Georgia,serif;font-size:clamp(2.4rem,11vw,3.6rem);line-height:1.05;margin:0 0 8px;font-weight:600;overflow-wrap:anywhere}
+.info{color:var(--tenue);font-size:.92rem;margin:0 0 22px}
+.definizione{font-family:ui-serif,"New York",Georgia,serif;font-size:clamp(1.2rem,5.2vw,1.45rem);line-height:1.4;margin:0 0 16px}
+.esempio{color:var(--tenue);font-style:italic;font-size:1.02rem;margin:0}
+.azioni-carta{display:flex;gap:14px;margin-top:34px}
+.azione{width:52px;height:52px;border-radius:50%;border:1px solid var(--linea);background:var(--piano);display:grid;place-items:center;color:var(--testo)}
+.azione[aria-pressed="true"]{color:var(--sbagliato);border-color:currentColor}
+.azione[aria-pressed="true"] svg{fill:currentColor}
+.suggerimento{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 78px);text-align:center;color:var(--tenue);font-size:.82rem}
+.vuoto{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:100dvh;padding:0 28px;max-width:640px;margin:0 auto}
+
+/* Fogli che salgono dal basso */
+dialog.foglio{border:0;padding:0;margin:auto auto 0;width:100%;max-width:640px;max-height:88dvh;border-radius:22px 22px 0 0;
+  background:var(--piano);color:var(--testo);overflow:auto;overscroll-behavior:contain}
+dialog.foglio.alto{height:94dvh;max-height:94dvh}
+dialog.foglio::backdrop{background:rgba(0,0,0,.42)}
+.foglio .corpo{padding:10px max(18px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 22px) max(18px,env(safe-area-inset-left,0px))}
+.maniglia{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--piano);z-index:1;
+  padding:14px max(18px,env(safe-area-inset-right,0px)) 8px max(18px,env(safe-area-inset-left,0px))}
+.maniglia h2{font-size:1.25rem;margin:0}
+.chiudi{width:36px;height:36px;border-radius:50%;border:0;background:var(--incasso);display:grid;place-items:center}
+.foglio h3{font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--tenue);margin:22px 0 10px;font-weight:650}
+.nota{color:var(--tenue);font-size:.88rem;margin:8px 0 0}
+
+.chip{display:flex;flex-wrap:wrap;gap:8px}
+.chip button{min-height:40px;padding:0 15px;border-radius:999px;border:1px solid var(--linea);background:transparent;font-weight:550}
+.chip button[aria-pressed="true"]{background:var(--accento);border-color:var(--accento);color:var(--su-accento)}
+
+.righe{list-style:none;margin:0;padding:0;border:1px solid var(--linea);border-radius:16px;overflow:hidden}
+.righe li + li{border-top:1px solid var(--linea)}
+.riga{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:10px 14px;border:0;background:transparent;text-align:left}
+.riga .tit{flex:1;min-width:0}
+.riga .tit b{display:block;font-weight:600}
+.riga .tit small{display:block;color:var(--tenue);font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.riga .num{color:var(--tenue);font-size:.88rem;font-variant-numeric:tabular-nums}
+.spunta{width:24px;height:24px;border-radius:7px;border:2px solid var(--linea);display:grid;place-items:center;flex:none}
+.riga[aria-checked="true"] .spunta{background:var(--accento);border-color:var(--accento);color:var(--su-accento)}
+
+.temi{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.tema{border-radius:18px;border:2px solid transparent;padding:16px 14px;text-align:left;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;
+  background:var(--sfondo);color:var(--testo);box-shadow:inset 0 0 0 1px var(--linea)}
+.tema b{font-family:ui-serif,"New York",Georgia,serif;font-size:1.5rem;font-weight:600}
+.tema small{color:var(--tenue)}
+.tema[aria-pressed="true"]{border-color:var(--accento)}
+
+.cifre{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cifra{background:var(--incasso);border-radius:16px;padding:12px;text-align:center}
+.cifra b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums}
+.cifra small{color:var(--tenue);font-size:.78rem}
+.settimana{display:flex;justify-content:space-between;margin-top:12px;gap:4px}
+.giorno{flex:1;text-align:center;font-size:.72rem;color:var(--tenue)}
+.giorno i{display:block;width:30px;height:30px;margin:0 auto 4px;border-radius:50%;border:2px solid var(--linea)}
+.giorno.si i{background:var(--accento);border-color:var(--accento)}
+
+input[type=search]{width:100%;min-height:46px;border:1px solid var(--linea);border-radius:12px;background:var(--sfondo);color:var(--testo);padding:0 14px;font-size:1rem;-webkit-appearance:none;appearance:none}
+select{min-height:40px;border:1px solid var(--linea);border-radius:10px;background:var(--sfondo);color:var(--testo);padding:0 10px;font-size:1rem}
+.btn{display:block;width:100%;min-height:50px;border-radius:14px;border:1px solid var(--linea);background:var(--piano);font-weight:650;padding:0 14px;margin-top:10px}
+.btn.primario{background:var(--accento);border-color:var(--accento);color:var(--su-accento)}
+.btn.pericolo{color:var(--sbagliato)}
+.btn:disabled{opacity:.45}
+.btn:active,.riga:active,.azione:active,.pillola:active,.tondo:active{filter:brightness(.94)}
+.impostazione{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:50px}
+
+/* Giochi */
+.modi{display:grid;gap:10px}
+.modo{display:flex;gap:14px;align-items:center;text-align:left;padding:16px;border-radius:18px;border:1px solid var(--linea);background:var(--sfondo)}
+.modo .ico{width:44px;height:44px;border-radius:14px;background:var(--accento);color:var(--su-accento);display:grid;place-items:center;flex:none}
+.modo b{display:block}
+.modo small{color:var(--tenue)}
+.progresso{height:6px;background:var(--incasso);border-radius:99px;overflow:hidden;margin:4px 0 22px}
+.progresso i{display:block;height:100%;background:var(--accento);transition:width .25s}
+.domanda{font-family:ui-serif,"New York",Georgia,serif;font-size:1.35rem;line-height:1.35;margin:0 0 22px;min-height:3em}
+.domanda.grande{font-size:2.3rem;font-weight:600}
+.opzioni{display:grid;gap:10px}
+.opzione{min-height:56px;padding:12px 16px;border-radius:16px;border:1.5px solid var(--linea);background:var(--sfondo);text-align:left;font-size:1rem;line-height:1.3}
+.opzione.giusta{border-color:var(--giusto);background:color-mix(in srgb,var(--giusto) 16%,var(--sfondo))}
+.opzione.errata{border-color:var(--sbagliato);background:color-mix(in srgb,var(--sbagliato) 16%,var(--sfondo))}
+.opzione:disabled{cursor:default;color:var(--testo)}
+.esito{font-size:3rem;font-weight:700;font-family:ui-serif,"New York",Georgia,serif;margin:10px 0 0}
+
+.avviso{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 82px);z-index:30;
+  background:var(--testo);color:var(--sfondo);padding:10px 18px;border-radius:999px;font-size:.92rem;max-width:calc(100% - 32px);box-shadow:var(--ombra);text-align:center}
+
+@media (prefers-reduced-motion:no-preference){
+  dialog.foglio[open]{animation:sale .22s ease-out}
+  .azione[aria-pressed="true"] svg{animation:batte .3s ease-out}
+}
+@keyframes sale{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes batte{50%{transform:scale(1.25)}}
+.maniglia h2:focus{outline:none}

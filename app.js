@@ -56,7 +56,10 @@ function datiVuoti() {
     tema: 'carta',
     obiettivo: 10,
     voce: 1,
-    serieMax: 0
+    serieMax: 0,
+    test: null,          // { giorno, livello, punti: {1,2,3}, stima }
+    testProposto: false,
+    notifiche: { n: 10 }
   };
 }
 
@@ -84,6 +87,11 @@ function normalizza(d) {
   out.obiettivo = [5, 10, 15, 20, 30].includes(Number(out.obiettivo)) ? Number(out.obiettivo) : 10;
   out.voce = [0.8, 1, 1.15].includes(Number(out.voce)) ? Number(out.voce) : 1;
   out.serieMax = Number(out.serieMax) || 0;
+  if (!out.test || typeof out.test !== 'object' || !LIVELLI[Number(out.test.livello)]) out.test = null;
+  else out.test = { giorno: String(out.test.giorno || ''), livello: Number(out.test.livello), stima: Number(out.test.stima) || 0,
+    punti: { 1: Number(out.test.punti?.[1]) || 0, 2: Number(out.test.punti?.[2]) || 0, 3: Number(out.test.punti?.[3]) || 0 } };
+  out.testProposto = out.testProposto === true;
+  out.notifiche = { n: [5, 10, 15].includes(Number(out.notifiche?.n)) ? Number(out.notifiche.n) : 10 };
   return out;
 }
 
@@ -498,6 +506,11 @@ function disegnaProfilo() {
   });
   h += '<h3>Viste di recente</h3>' + elenco(recenti, 'Ancora nessuna parola vista.');
 
+  h += '<h3>Il tuo livello</h3>' + (dati.test
+    ? '<p class="nota" style="margin-top:0">Test del ' + esc(dataLeggibile(dati.test.giorno)) + ': livello <b>' + esc(LIVELLI[dati.test.livello]) + '</b>, conosci circa ' + esc(dati.test.stima.toLocaleString('it-IT')) + ' parole su ' + PAROLE.length.toLocaleString('it-IT') + '.</p>'
+    : '<p class="nota" style="margin-top:0">Non hai ancora fatto il test: in 3 minuti l\'app capisce da che livello partire.</p>') +
+    '<button class="btn" type="button" id="apri-test">' + (dati.test ? 'Rifai il test del livello' : 'Fai il test del livello') + '</button>';
+  h += sezioneNotifiche();
   h += '<h3>Impostazioni</h3>' +
     '<label class="impostazione"><span>Obiettivo giornaliero</span><select id="sel-obiettivo">' +
       [5, 10, 15, 20, 30].map((n) => '<option value="' + n + '"' + (dati.obiettivo === n ? ' selected' : '') + '>' + n + ' parole</option>').join('') + '</select></label>' +
@@ -530,12 +543,16 @@ $('#foglio-profilo').addEventListener('input', (ev) => {
 $('#foglio-profilo').addEventListener('change', (ev) => {
   if (ev.target.id === 'sel-obiettivo') { dati.obiettivo = Number(ev.target.value); salva(); aggiornaBarre(); }
   else if (ev.target.id === 'sel-voce') { dati.voce = Number(ev.target.value); salva(); }
+  else if (ev.target.id === 'sel-notifiche') { dati.notifiche.n = Number(ev.target.value); salva(); disegnaProfiloMantenendoRicerca(); }
   else if (ev.target.id === 'file-copia') importa(ev.target.files[0]);
 });
 $('#foglio-profilo').addEventListener('click', (ev) => {
   const r = ev.target.closest('[data-apri]');
   if (r) { apriParola(r.dataset.apri); return; }
   const id = ev.target.closest('button') && ev.target.closest('button').id;
+  if (id === 'apri-test') { apriTest(); return; }
+  if (id === 'attiva-notifiche') { attivaNotifiche(); return; }
+  if (id === 'copia-codice') { copiaCodice(); return; }
   if (id === 'esporta') esporta();
   else if (id === 'importa') $('#file-copia').click();
   else if (id === 'azzera') {
@@ -664,10 +681,20 @@ function nuovaPartita(modo) {
   disegnaDomanda();
 }
 
-function distrattori(p, modo) {
-  const stessoTipo = PAROLE.filter((x) => x[0] !== p[0] && x[3] === p[3]);
-  const altri = PAROLE.filter((x) => x[0] !== p[0] && x[3] !== p[3]);
-  return mescola(stessoTipo).concat(mescola(altri)).slice(0, 3);
+/* Tre risposte sbagliate dello stesso tipo, con definizioni che non iniziano come quella giusta né tra loro
+   (evita coppie quasi uguali come «Rimprovero severo…» e «Rimprovero aspro…»). */
+function distrattori(p) {
+  const inizio = (x) => x[4].toLowerCase().split(/[\s,;.]+/)[0];
+  const usati = new Set([inizio(p)]);
+  const scelti = [];
+  const candidati = mescola(PAROLE.filter((x) => x[3] === p[3])).concat(mescola(PAROLE.filter((x) => x[3] !== p[3])));
+  for (const x of candidati) {
+    if (x[0] === p[0] || usati.has(inizio(x))) continue;
+    usati.add(inizio(x));
+    scelti.push(x);
+    if (scelti.length === 3) break;
+  }
+  return scelti;
 }
 
 function disegnaDomanda() {
@@ -749,6 +776,210 @@ $('#foglio-ripassa').addEventListener('click', (ev) => {
   if (a) apriParola(a.dataset.apri);
 });
 
+/* ---------- Test del livello ---------- */
+const DOMANDE_PER_LIVELLO = 8;
+const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+function dataLeggibile(g) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(g || '');
+  return m ? Number(m[3]) + ' ' + MESI[Number(m[2]) - 1] + ' ' + m[1] : g;
+}
+
+let prova = null;
+
+function apriTest() {
+  prova = null;
+  const d = $('#foglio-test');
+  d.innerHTML = testaFoglio('Test del livello', 'test-titolo') + '<div class="corpo">' +
+    '<p class="definizione" style="margin-top:8px">Scopri quante parole difficili conosci già.</p>' +
+    '<p class="nota" style="font-size:1rem">' + (DOMANDE_PER_LIVELLO * 3) + ' parole, dalle più note alle più rare. Per ognuna scegli il significato giusto.</p>' +
+    '<p class="nota" style="font-size:1rem">Se non la conosci tocca <b>«Non la conosco»</b>: tirare a indovinare falsa il risultato.</p>' +
+    '<p class="nota" style="font-size:1rem">Alla fine l\'app ti propone le parole del tuo livello. Dura circa 3 minuti.</p>' +
+    '<button class="btn primario" type="button" id="inizia-test">Inizia il test</button>' +
+    '<button class="btn" type="button" data-chiudi>Più tardi</button></div>';
+  apri(d);
+}
+
+function iniziaTest() {
+  const domande = [];
+  for (const liv of [1, 2, 3]) domande.push(...mescola(PAROLE.filter((p) => p[2] === liv)).slice(0, DOMANDE_PER_LIVELLO));
+  prova = { domande, i: 0, risposte: [], bloccata: false };
+  disegnaDomandaTest();
+}
+
+function disegnaDomandaTest() {
+  const d = $('#foglio-test');
+  const p = prova.domande[prova.i];
+  const opzioni = mescola([p].concat(distrattori(p)));
+  d.innerHTML = testaFoglio('Test del livello', 'test-titolo') + '<div class="corpo">' +
+    '<div class="nota" style="margin:0 0 8px">Parola ' + (prova.i + 1) + ' di ' + prova.domande.length + '</div>' +
+    '<div class="progresso"><i style="width:' + (prova.i / prova.domande.length * 100) + '%"></i></div>' +
+    '<p class="domanda grande">' + esc(p[0]) + '</p><div class="opzioni">' +
+    opzioni.map((x) => '<button class="opzione" type="button" data-test="' + esc(x[0]) + '">' + esc(x[4]) + '</button>').join('') +
+    '<button class="opzione non-so" type="button" data-test="">Non la conosco</button></div></div>';
+  prova.bloccata = false;
+  prova.pronta = Date.now() + 300;
+  $('#test-titolo').focus({ preventScroll: true });
+}
+
+function rispondiTest(b) {
+  if (prova.bloccata || Date.now() < prova.pronta) return;
+  prova.bloccata = true;
+  const p = prova.domande[prova.i];
+  const scelta = b.dataset.test;
+  prova.risposte.push({ parola: p[0], livello: p[2], esito: scelta === p[0] ? 'giusta' : scelta ? 'sbagliata' : 'non-so' });
+  document.querySelectorAll('#foglio-test .opzione').forEach((o) => {
+    o.disabled = true;
+    if (o.dataset.test === p[0]) o.classList.add('giusta');
+    else if (o === b && scelta) o.classList.add('errata');
+  });
+  setTimeout(() => {
+    if (!$('#foglio-test').open || !prova) return;
+    if (++prova.i < prova.domande.length) disegnaDomandaTest(); else concludiTest();
+  }, scelta === p[0] ? 450 : 900);
+}
+
+/* Punteggio corretto per le risposte a caso: con 4 opzioni, ogni errore "costa" un terzo di risposta giusta. */
+function calcolaLivello(risposte) {
+  const punti = {};
+  for (const liv of [1, 2, 3]) {
+    const r = risposte.filter((x) => x.livello === liv);
+    const g = r.filter((x) => x.esito === 'giusta').length;
+    const s = r.filter((x) => x.esito === 'sbagliata').length;
+    punti[liv] = r.length ? Math.max(0, (g - s / 3) / r.length) : 0;
+  }
+  const livello = punti[2] >= 0.7 ? 3 : punti[1] >= 0.7 ? 2 : 1;
+  const stima = Math.round([1, 2, 3].reduce((t, liv) => t + punti[liv] * PAROLE.filter((p) => p[2] === liv).length, 0));
+  return { livello, punti, stima };
+}
+
+function concludiTest() {
+  const ris = calcolaLivello(prova.risposte);
+  dati.test = { giorno: giorno(), livello: ris.livello, punti: ris.punti, stima: ris.stima };
+  /* Le parole indovinate risultano già viste: il flusso propone prima quelle nuove. */
+  for (const r of prova.risposte) if (r.esito === 'giusta' && !(r.parola in dati.viste)) dati.viste[r.parola] = giorno();
+  salva();
+  const spiegazione = {
+    1: 'Partiamo dalle parole colte: quelle che si incontrano nei libri e nei giornali ma che non tutti usano.',
+    2: 'Le parole colte le conosci bene. Ti propongo le ricercate, poi passerai alle rare.',
+    3: 'Hai un lessico molto ricco. Ti propongo direttamente le parole rare e letterarie.'
+  }[ris.livello];
+  const barra = (liv) => '<div class="impostazione" style="min-height:36px"><span>' + LIVELLI[liv] + '</span><span class="nota" style="margin:0">' + Math.round(ris.punti[liv] * 100) + '%</span></div>' +
+    '<div class="progresso" style="margin:0 0 6px"><i style="width:' + Math.round(ris.punti[liv] * 100) + '%"></i></div>';
+  const d = $('#foglio-test');
+  d.innerHTML = testaFoglio('Il tuo livello', 'test-titolo') + '<div class="corpo">' +
+    '<p class="esito">' + esc(LIVELLI[ris.livello]) + '</p>' +
+    '<p class="definizione" style="margin-top:10px">' + esc(spiegazione) + '</p>' +
+    '<p class="nota" style="font-size:1rem">Conosci circa <b>' + ris.stima.toLocaleString('it-IT') + '</b> delle ' + PAROLE.length.toLocaleString('it-IT') + ' parole dell\'app.</p>' +
+    '<h3>Risultato per livello</h3>' + [1, 2, 3].map(barra).join('') +
+    '<button class="btn primario" type="button" id="usa-livello">Mostrami le parole di livello ' + esc(LIVELLI[ris.livello].toLowerCase()) + '</button>' +
+    '<button class="btn" type="button" id="tutti-livelli">Mostrami tutti i livelli</button></div>';
+  prova = null;
+  $('#test-titolo').focus({ preventScroll: true });
+}
+
+function applicaLivello(liv) {
+  dati.filtro = Object.assign({}, dati.filtro, { livello: liv, raccolta: 'tutte' });
+  salva();
+  aggiornaBarre();
+  ricostruisciFlusso();
+  $('#foglio-test').close();
+  if ($('#foglio-profilo').open) disegnaProfiloMantenendoRicerca();
+}
+
+$('#foglio-test').addEventListener('click', (ev) => {
+  if (ev.target.closest('#inizia-test')) { iniziaTest(); return; }
+  const o = ev.target.closest('[data-test]');
+  if (o && prova) { rispondiTest(o); return; }
+  if (ev.target.closest('#usa-livello')) applicaLivello(dati.test.livello);
+  else if (ev.target.closest('#tutti-livelli')) applicaLivello(0);
+});
+
+/* ---------- Notifiche ---------- */
+/* L'app non può programmarsi le notifiche da sola su iPhone: le invia un'automazione su GitHub
+   (cartella .github nel repository) usando il codice di iscrizione che l'utente passa una volta. */
+const chiaveNotifiche = () => (typeof VAPID_PUBBLICA === 'string' ? VAPID_PUBBLICA : '');
+const installata = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const pushPossibile = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+let codiceNotifiche = '';
+
+function sezioneNotifiche() {
+  let h = '<h3>Notifiche</h3>' +
+    '<label class="impostazione"><span>Parole al giorno, tra le 9 e le 21</span><select id="sel-notifiche">' +
+    [5, 10, 15].map((n) => '<option value="' + n + '"' + (dati.notifiche.n === n ? ' selected' : '') + '>' + n + '</option>').join('') + '</select></label>';
+  if (!pushPossibile() || !installata()) {
+    return h + '<p class="nota">Le notifiche arrivano solo all\'app installata sulla schermata Home (iPhone con iOS 16.4 o successivo). Aprila dall\'icona, non da Safari.</p>';
+  }
+  if (!chiaveNotifiche()) return h + '<p class="nota">Le notifiche non sono ancora configurate su GitHub.</p>';
+  if (Notification.permission === 'denied') {
+    return h + '<p class="nota">Hai negato il permesso. Riattivalo da Impostazioni › Notifiche › Vocabolario, poi torna qui.</p>';
+  }
+  h += '<div id="stato-notifiche"><p class="nota">Controllo lo stato…</p></div>';
+  setTimeout(aggiornaStatoNotifiche, 0);
+  return h;
+}
+
+function testoCodice(sub) {
+  const livello = dati.filtro.livello || (dati.test ? dati.test.livello : 0);
+  return JSON.stringify({ v: 1, n: dati.notifiche.n, livello, sub: sub.toJSON() });
+}
+
+async function aggiornaStatoNotifiche() {
+  const box = $('#stato-notifiche');
+  if (!box) return;
+  let sub = null;
+  try { const reg = await navigator.serviceWorker.ready; sub = await reg.pushManager.getSubscription(); } catch (e) { sub = null; }
+  if (!$('#stato-notifiche')) return;
+  if (!sub) {
+    box.innerHTML = '<button class="btn primario" type="button" id="attiva-notifiche">Attiva le notifiche</button>';
+    return;
+  }
+  codiceNotifiche = testoCodice(sub);
+  box.innerHTML = '<p class="nota">Notifiche attive su questo telefono. Ultimo passo: copia il codice e mandalo a Claude. ' +
+    'Rimandalo se cambi il numero di parole o il livello.</p>' +
+    '<textarea class="codice" readonly rows="3" aria-label="Codice per le notifiche">' + esc(codiceNotifiche) + '</textarea>' +
+    '<button class="btn primario" type="button" id="copia-codice">Copia il codice</button>';
+}
+
+function chiaveInByte(b64) {
+  const s = atob((b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(s, (c) => c.charCodeAt(0));
+}
+
+async function attivaNotifiche() {
+  try {
+    const permesso = await Notification.requestPermission();
+    if (permesso !== 'granted') { avviso('Senza permesso le notifiche non possono arrivare.'); disegnaProfiloMantenendoRicerca(); return; }
+    const reg = await navigator.serviceWorker.ready;
+    await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chiaveInByte(chiaveNotifiche()) });
+    avviso('Notifiche attivate');
+  } catch (e) {
+    avviso('Non sono riuscito ad attivare le notifiche: riprova tra poco.');
+  }
+  aggiornaStatoNotifiche();
+}
+
+async function copiaCodice() {
+  try { await navigator.clipboard.writeText(codiceNotifiche); avviso('Codice copiato: incollalo a Claude'); }
+  catch (e) { const t = $('.codice'); if (t) { t.focus(); t.select(); } avviso('Selezionalo e copialo a mano'); }
+}
+
+/* Un tocco sulla notifica apre l'app su quella parola (?parola=...). */
+function apriParolaDaIndirizzo() {
+  const nome = new URLSearchParams(location.search).get('parola');
+  if (!nome) return;
+  history.replaceState(null, '', location.pathname);
+  if (PER_NOME.has(nome)) {
+    if (!(nome in dati.viste)) dati.viste[nome] = giorno();
+    registraAttivita(nome);
+    apriParola(nome);
+  }
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (ev) => {
+    if (ev.data && ev.data.tipo === 'apri-parola' && PER_NOME.has(ev.data.parola)) apriParola(ev.data.parola);
+  });
+}
+
 /* ---------- Avvio ---------- */
 $('#btn-categorie').addEventListener('click', apriCategorie);
 $('#btn-temi').addEventListener('click', apriTemi);
@@ -767,6 +998,8 @@ setInterval(() => { if (giorno() !== giornoAperto) { giornoAperto = giorno(); ag
 applicaTema();
 aggiornaBarre();
 ricostruisciFlusso();
+apriParolaDaIndirizzo();
+if (!dati.test && !dati.testProposto && !$('#foglio-parola').open) { dati.testProposto = true; salva(); apriTest(); }
 if (datiRecuperati) avviso('I dati salvati erano illeggibili: li ho messi da parte e riparto da zero.');
 if (!memoriaOk) avviso('La memoria del telefono non è disponibile: i progressi non verranno salvati.');
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});

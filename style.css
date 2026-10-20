@@ -149,3 +149,5 @@ select{min-height:40px;border:1px solid var(--linea);border-radius:10px;backgrou
 .nota a{color:inherit}
 @media (max-height:700px){.carta .extra{-webkit-line-clamp:2}.azioni-carta{margin-top:22px}}
 .extra.aperta{-webkit-line-clamp:unset;display:block}
+.opzione.non-so{border-style:dashed;color:var(--tenue);text-align:center}
+.codice{width:100%;margin-top:10px;border:1px solid var(--linea);border-radius:12px;background:var(--sfondo);color:var(--testo);padding:10px;font:12px/1.35 ui-monospace,Menlo,monospace;resize:none;word-break:break-all}

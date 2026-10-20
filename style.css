@@ -143,3 +143,9 @@ select{min-height:40px;border:1px solid var(--linea);border-radius:10px;backgrou
 @keyframes sale{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
 @keyframes batte{50%{transform:scale(1.25)}}
 .maniglia h2:focus{outline:none}
+.sillabe{font-family:ui-serif,"New York",Georgia,serif;font-style:italic}
+.extra{color:var(--tenue);font-size:.86rem;margin:10px 0 0;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.extra b{color:var(--testo);font-weight:650;margin-right:4px}
+.nota a{color:inherit}
+@media (max-height:700px){.carta .extra{-webkit-line-clamp:2}.azioni-carta{margin-top:22px}}
+.extra.aperta{-webkit-line-clamp:unset;display:block}

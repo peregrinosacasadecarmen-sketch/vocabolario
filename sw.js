@@ -2,8 +2,8 @@
 /* Funzionamento senza connessione: i file dell'app vengono tenuti in copia sul dispositivo.
    A ogni rilascio cambiare VERSIONE, così i telefoni scaricano subito tutti i file nuovi insieme. */
 const PREFISSO = 'voc-';
-const VERSIONE = PREFISSO + 'v1';
-const FILE = ['./', 'index.html', 'style.css', 'parole.js', 'app.js', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
+const VERSIONE = PREFISSO + 'v3';
+const FILE = ['./', 'index.html', 'style.css', 'parole.js', 'parole-wiki.js', 'extra.js', 'app.js', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 const BASE = new URL('./', self.location).href;
 const NOTI = new Set(FILE.map((f) => new URL(f, BASE).href));

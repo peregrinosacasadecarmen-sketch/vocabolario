@@ -216,12 +216,15 @@ let osservatore;
 function cartaHtml(p, etichetta, conSuggerimento) {
   const [parola, cat, liv, tipo, def, es] = p;
   const pref = dati.preferite.includes(parola);
+  const x = (typeof EXTRA !== 'undefined' && EXTRA[parola]) || {};
   return '<article class="carta" data-parola="' + esc(parola) + '" aria-label="' + esc(parola) + '">' +
     '<div class="etichetta">' + esc(etichetta || CATEGORIE[cat]) + '</div>' +
     '<h1 class="parola">' + esc(parola) + '</h1>' +
-    '<p class="info">' + esc(tipo) + ' · ' + esc(LIVELLI[liv]) + '</p>' +
+    '<p class="info">' + (x.s ? '<span class="sillabe">' + esc(x.s) + '</span> · ' : '') + esc(tipo) + ' · ' + esc(LIVELLI[liv]) + '</p>' +
     '<p class="definizione">' + esc(def) + '</p>' +
     '<p class="esempio">«' + esc(es) + '»</p>' +
+    (x.e ? '<p class="extra"><b>Origine</b> ' + esc(x.e) + '</p>' : '') +
+    (x.n ? '<p class="extra"><b>Sinonimi</b> ' + esc(x.n.join(', ')) + '</p>' : '') +
     '<div class="azioni-carta">' +
       '<button class="azione" type="button" data-azione="voce" aria-label="Ascolta">' + ICO.voce + '</button>' +
       '<button class="azione" type="button" data-azione="preferita" aria-pressed="' + pref + '" aria-label="Preferita">' + ICO.cuore + '</button>' +
@@ -341,6 +344,11 @@ async function condividi(p) {
 flusso.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-azione]');
   if (b) azioneParola(b);
+});
+/* Origine e sinonimi lunghi sono tagliati: un tocco li apre per intero. */
+document.addEventListener('click', (ev) => {
+  const e = ev.target.closest('.extra');
+  if (e) e.classList.toggle('aperta');
 });
 
 /* ---------- Fogli ---------- */
@@ -501,7 +509,9 @@ function disegnaProfilo() {
     '<button class="btn" type="button" id="importa">Ripristina da una copia</button>' +
     '<input type="file" id="file-copia" accept="application/json,.json" hidden>' +
     '<button class="btn pericolo" type="button" id="azzera">' + (confermaAzzera ? 'Tocca di nuovo per cancellare tutto' : 'Azzera i progressi') + '</button>' +
-    '<p class="nota">' + PAROLE.length + ' parole, con definizioni ed esempi scritti per questa app.</p>';
+    '<p class="nota">' + PAROLE.length.toLocaleString('it-IT') + ' parole, con definizioni ed esempi scritti per questa app. ' +
+    'Elenco delle parole, sillabe, origini e sinonimi tratti dal <a href="https://it.wiktionary.org/" target="_blank" rel="noopener">Wikizionario</a>, ' +
+    'licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p>';
   h += '</div>';
   d.innerHTML = h;
 }
@@ -617,7 +627,12 @@ function fontiGioco() {
 }
 
 /* Per "Completa la frase" servono esempi che contengono la parola nella stessa forma. */
-function contieneParola(p) { return p[5].toLowerCase().includes(p[0].toLowerCase()); }
+/* La parola deve comparire intera, non dentro un'altra (es. "arte" in "parte"). */
+function posizioneParola(p) {
+  const m = new RegExp('(^|[^\\p{L}])(' + p[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![\\p{L}])', 'iu').exec(p[5]);
+  return m ? m.index + m[1].length : -1;
+}
+function contieneParola(p) { return posizioneParola(p) >= 0; }
 
 function apriRipassa() {
   partita = null;
@@ -665,7 +680,7 @@ function disegnaDomanda() {
   if (modo === 'parola') domanda = '<p class="domanda">' + esc(p[4]) + '</p>';
   else if (modo === 'significato') domanda = '<p class="domanda grande">' + esc(p[0]) + '</p>';
   else {
-    const pos = p[5].toLowerCase().indexOf(p[0].toLowerCase());
+    const pos = posizioneParola(p);
     domanda = '<p class="domanda">«' + esc(p[5].slice(0, pos)) + '_____' + esc(p[5].slice(pos + p[0].length)) + '»</p>';
   }
   let h = testaFoglio(MODI[modo][0], 'rip-titolo', true) + '<div class="corpo">';

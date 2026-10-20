@@ -10,7 +10,8 @@ const CATEGORIE = {
   natura: 'Natura e scienza',
   arte: 'Arte e cultura',
   quotidiano: 'Vita quotidiana',
-  rare: 'Parole preziose'
+  rare: 'Parole preziose',
+  geopolitica: 'Geopolitica umana'
 };
 
 const LIVELLI = { 1: 'Colta', 2: 'Ricercata', 3: 'Rara' };
@@ -95,7 +96,7 @@ const PAROLE = [
   ['gattopardesco', 'societa', 2, 'agg.', 'Che cambia tutto in apparenza perché nulla cambi davvero.', 'Fu un cambiamento gattopardesco: tutto rimase come prima.'],
   ['bizantino', 'societa', 2, 'agg.', 'Eccessivamente cavilloso e complicato.', 'Un regolamento bizantino scoraggiava chiunque.'],
   ['cavillo', 'societa', 1, 's.m.', 'Argomento sottile e pretestuoso per eludere o complicare.', 'L\'avvocato trovò un cavillo e la causa si fermò.'],
-  ['autarchia', 'societa', 2, 's.f.', 'Autosufficienza economica di uno Stato, che produce da sé ciò che consuma.', 'Durante l\'autarchia mancavano molti prodotti esteri.'],
+  ['autarchia', 'geopolitica', 2, 's.f.', 'Autosufficienza economica di uno Stato, che produce da sé ciò che consuma.', 'Durante l\'autarchia mancavano molti prodotti esteri.'],
   ['plutocrazia', 'societa', 2, 's.f.', 'Potere esercitato da chi detiene la ricchezza.', 'Temeva che la democrazia diventasse una plutocrazia.'],
   ['oclocrazia', 'societa', 3, 's.f.', 'Governo della folla, degenerazione della democrazia.', 'Polibio descrisse l\'oclocrazia come una forma corrotta.'],
   ['ostracismo', 'societa', 1, 's.m.', 'Esclusione di qualcuno da un gruppo o da un ambiente.', 'Dopo lo scandalo subì l\'ostracismo dei colleghi.'],
@@ -282,12 +283,12 @@ const PAROLE = [
   ['apolide', 'societa', 2, 'agg.', 'Senza cittadinanza.', 'Rimase apolide per anni.'],
   ['assolutismo', 'societa', 1, 's.m.', 'Sistema in cui il sovrano ha un potere senza limiti.', 'L\'assolutismo di Luigi XIV.'],
   ['cooptazione', 'societa', 3, 's.f.', 'Scelta di nuovi membri da parte di quelli già in carica.', 'Entrò nel consiglio per cooptazione.'],
-  ['egemonia', 'societa', 1, 's.f.', 'Predominio di uno su altri.', 'L\'egemonia di Atene sul mare durò decenni.'],
+  ['egemonia', 'geopolitica', 1, 's.f.', 'Predominio di uno su altri.', 'L\'egemonia di Atene sul mare durò decenni.'],
   ['eversivo', 'societa', 2, 'agg.', 'Che mira a sovvertire l\'ordine costituito.', 'Un gruppo eversivo fu sciolto.'],
   ['fazioso', 'societa', 2, 'agg.', 'Parziale, che sostiene una parte in modo settario.', 'Un giornale fazioso.'],
   ['lobbista', 'societa', 1, 's.m.', 'Chi fa pressione su chi decide per conto di un gruppo di interessi.', 'Un lobbista incontrò i deputati.'],
   ['malversazione', 'societa', 3, 's.f.', 'Uso illecito di denaro pubblico da parte di chi lo gestisce.', 'Fu condannato per malversazione.'],
-  ['oligarchia', 'societa', 1, 's.f.', 'Governo di pochi.', 'La città era retta da un\'oligarchia.'],
+  ['oligarchia', 'geopolitica', 1, 's.f.', 'Governo di pochi.', 'La città era retta da un\'oligarchia.'],
   ['ostativo', 'societa', 3, 'agg.', 'Che impedisce, che fa da ostacolo.', 'C\'era un motivo ostativo alla nomina.'],
   ['pletorico', 'societa', 3, 'agg.', 'Sovrabbondante, eccessivo, detto di organi o personale.', 'Un consiglio pletorico che non decide nulla.'],
   ['plebiscito', 'societa', 1, 's.m.', 'Voto popolare diretto; consenso larghissimo.', 'Fu eletto con un plebiscito.'],

@@ -29,7 +29,7 @@ export function scegliParola(parole, livello, chiave) {
 function caricaParole() {
   const ctx = { PAROLE: undefined };
   vm.createContext(ctx);
-  for (const f of ['parole.js', 'parole-wiki.js']) {
+  for (const f of ['parole.js', 'parole-wiki.js', 'parole-geo.js']) {
     vm.runInContext(readFileSync(new URL(f, radice), 'utf8').replace(/^'use strict';/, '').replace(/\bconst (PAROLE|CATEGORIE|LIVELLI)\b/g, 'var $1'), ctx);
   }
   return ctx.PAROLE;

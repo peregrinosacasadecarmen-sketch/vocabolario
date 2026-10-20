@@ -71,5 +71,9 @@ PAROLE.push(
   ['fattuale', 'geopolitica', 2, 'agg.', 'Basato sui fatti, non su opinioni o desideri.', 'Serve un\'analisi fattuale, non ideologica.'],
   ['ontologico', 'geopolitica', 3, 'agg.', 'Che riguarda l\'essenza stessa di qualcosa.', 'Per Mosca la sicurezza è un problema ontologico.'],
   ['autodidatta', 'geopolitica', 1, 's.m.', 'Chi si è istruito da solo, senza maestri né scuole.', 'Si definiva un orgoglioso autodidatta.'],
+  ['endonimo', 'geopolitica', 3, 's.m.', 'Nome con cui un popolo o un luogo chiama sé stesso, nella propria lingua.', 'Deutschland è l\'endonimo, Germania il nome che usiamo noi.'],
+  ['esonimo', 'geopolitica', 3, 's.m.', 'Nome con cui un luogo o un popolo viene chiamato dagli stranieri, diverso da quello locale.', '«Londra» è l\'esonimo italiano di London.'],
+  ['etnonimo', 'geopolitica', 3, 's.m.', 'Nome di un popolo o di un gruppo etnico.', 'L\'etnonimo «greci» viene dai latini: loro si chiamano elleni.'],
+  ['toponimo', 'geopolitica', 2, 's.m.', 'Nome proprio di un luogo.', 'Ogni toponimo racconta un pezzo della storia di un territorio.'],
   ['armistizio', 'geopolitica', 1, 's.m.', 'Sospensione delle ostilità concordata tra le parti in guerra.', 'L\'armistizio fu firmato in un vagone ferroviario.']
 );

@@ -1,0 +1,48 @@
+name: Notifiche parole
+
+on:
+  schedule:
+    # Ogni mezz'ora (minuti 4 e 34 per evitare le ore di punta di GitHub), coprendo le 9–21 di Madrid
+    # sia con l'ora legale (UTC+2) sia con l'ora solare (UTC+1). Lo script decide se è un orario di invio.
+    - cron: '4,34 6-20 * * *'
+  workflow_dispatch:
+    inputs:
+      prova:
+        description: 'Invia subito una parola di prova'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: notifiche
+  cancel-in-progress: false
+
+jobs:
+  invia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Libreria per le notifiche
+        run: npm install --prefix .github/notifiche --no-save --no-audit --no-fund web-push@3.6.7
+      - name: Invia la parola
+        env:
+          ISCRIZIONE: ${{ secrets.ISCRIZIONE }}
+          VAPID_PRIVATA: ${{ secrets.VAPID_PRIVATA }}
+          PROVA: ${{ github.event_name == 'workflow_dispatch' && inputs.prova && '1' || '0' }}
+        run: node .github/notifiche/invia.mjs
+      # GitHub sospende le programmazioni dopo 60 giorni senza modifiche al repository: una volta al giorno la si riconferma.
+      - name: Mantieni attiva la programmazione
+        if: github.event_name == 'schedule' && github.event.schedule == '4,34 6-20 * * *'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(date -u +%H%M)" \< "0700" ]; then
+            gh api -X PUT "repos/${{ github.repository }}/actions/workflows/notifiche.yml/enable" || true
+          fi
